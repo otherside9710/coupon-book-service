@@ -22,7 +22,7 @@ Servicio para gestionar libros de cupones (crear, subir códigos, asignar, bloqu
 
 ```
 
-## Estructura del proyecto (generada automáticamente)
+## Estructura del proyecto
 
 ```
 coupon-book-service/
