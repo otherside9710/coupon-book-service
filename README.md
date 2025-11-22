@@ -20,6 +20,8 @@ Servicio para gestionar libros de cupones (crear, subir códigos, asignar, bloqu
 - Estado actual (resumen)
 - La mayoría de los endpoints y use-cases están implementados: crear libro, subir códigos, asignar (aleatorio/específico), bloquear y canjear.
 
+```
+
 ## Estructura del proyecto (generada automáticamente)
 
 ```
