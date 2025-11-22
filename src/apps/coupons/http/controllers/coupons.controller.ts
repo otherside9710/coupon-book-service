@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Param, Get, Query } from '@nestjs/common';
+import { Body, Controller, Post, Param, Get, Delete, NotFoundException, HttpCode } from '@nestjs/common';
 import { AssignCouponDto } from '../../../../contexts/coupons/application/dto/request/assign-coupon.dto';
 import { AssignRandomCouponUseCase } from '../../../../contexts/coupons/application/use-cases/assign-random-coupon.use-case';
 import { AssignSpecificCouponUseCase } from '../../../../contexts/coupons/application/use-cases/assign-specific-coupon.use-case';
@@ -7,6 +7,8 @@ import { RedeemCouponUseCase } from '../../../../contexts/coupons/application/us
 import { UploadCodesUseCase } from '../../../../contexts/coupons/application/use-cases/upload-codes.use-case';
 import { CreateCouponBookUseCase } from '../../../../contexts/coupons/application/use-cases/create-coupon-book.use-case';
 import { GetAllBooksUseCase } from '../../../../contexts/coupons/application/use-cases/get-all-books.use-case';
+import { DeleteCouponBookUseCase } from '../../../../contexts/coupons/application/use-cases/delete-coupon-book.use-case';
+import { CouponBookNotFoundException } from '../../../../contexts/coupons/domain/exceptions/coupon-book-not-found.exception';
 
 @Controller('coupons')
 export class CouponsController {
@@ -18,6 +20,7 @@ export class CouponsController {
     private readonly uploadCodes: UploadCodesUseCase,
     private readonly createCouponBook: CreateCouponBookUseCase,
     private readonly getAllBooksUseCase: GetAllBooksUseCase,
+    private readonly deleteCouponBook: DeleteCouponBookUseCase,
   ) {}
 
   @Get()
@@ -53,5 +56,19 @@ export class CouponsController {
   @Post('redeem/:code')
   async redeemEndpoint(@Param('code') code: string, @Body() body: any) {
     return this.redeemCoupon.execute({ ...body, code });
+  }
+
+  @Delete(':couponBookId')
+  @HttpCode(204)
+  async deleteCouponBookEndpoint(@Param('couponBookId') couponBookId: string) {
+    try {
+      await this.deleteCouponBook.execute(couponBookId);
+      return;
+    } catch (err) {
+      if (err instanceof CouponBookNotFoundException) {
+        throw new NotFoundException(err.message || 'Coupon book not found');
+      }
+      throw err;
+    }
   }
 }

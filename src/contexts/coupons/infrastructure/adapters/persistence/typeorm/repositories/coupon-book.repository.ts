@@ -27,4 +27,8 @@ export class CouponBookRepository implements ICouponBookRepository {
     const orm = CouponBookMapper.toOrm(couponBook as any);
     await this.repo.save(orm as any);
   }
+
+  async deleteById(id: string): Promise<void> {
+    await this.repo.delete(id);
+  }
 }

@@ -4,4 +4,5 @@ export interface ICouponCodeRepository {
   findByCode(code: string): Promise<any | null>;
   bulkInsert(codes: string[], couponBookId: string): Promise<{ inserted: number; duplicates: string[] }>;
   findByUser(userId: string, options?: { status?: string }): Promise<any[]>;
+  deleteByBookId(couponBookId: string): Promise<void>;
 }

@@ -191,14 +191,21 @@ La aplicación estará disponible en `http://localhost:3000`
 - `POST /coupons/lock/:code` — Bloquear temporalmente cupón (requiere asignación previa o pertenencia al usuario según reglas).
 - `POST /coupons/redeem/:code` — Canjear cupón.
 - `GET /users/:userId/coupons` — Obtener cupones asignados a un usuario.
+- `DELETE /coupons/:couponBookId` — Eliminar un libro de cupones y sus códigos asociados (204 No Content en éxito; 404 si no existe).
 - `GET /api/coupons` — Obtener todos los `Coupon Books` con sus códigos cargados (endpoint administrativo).
 
 ## Notas sobre comportamiento implementado
 
 - Al asignar, si `couponBook.maxCodesPerUser` está configurado se verifica y evita asignaciones adicionales.
 - Al canjear, si `allowMultipleRedemptionsPerUser` es `false` se verifica el histórico en `coupon_redemptions` y se rechaza si ya canjeó.
-- `findRandomAvailableWithLock` usa transacción + `FOR UPDATE SKIP LOCKED` para seleccionar un código disponible de forma segura en Postgres.
-- Metadata de lock y redemption (lockedAt, lockedBy, lockExpiresAt, redeemedAt, redeemedByUserId) ahora se persiste en `coupon_codes`.
+
+## Documentación y recursos relacionados
+
+Encontrarás documentación adicional, ejemplos de uso de la API y diagramas en la carpeta `docs/`:
+
+- `docs/API_EXAMPLES.md` — colección de ejemplos prácticos (curl) para los endpoints principales, incluyendo el ejemplo de `DELETE /api/coupons/:couponBookId` y flujos completos de prueba.
+- `docs/CHALLENGE.md` — enunciado del reto técnico que sirvió de guía para el diseño y los endpoints implementados.
+- `docs/diagrams/` — múltiples diagramas Mermaid (.mmd) con la arquitectura, modelo de datos (ERD) y el diagrama de secuencia. Puedes generar PNG/SVG usando el script de exportación.
 
 ## Migraciones
 

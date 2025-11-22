@@ -123,6 +123,12 @@ export class CouponCodeRepository implements ICouponCodeRepository {
     return found.map((f) => CouponCodeMapper.toDomain(f));
   }
 
+  async deleteByBookId(couponBookId: string): Promise<void> {
+    // Use the repository delete with a where clause. This respects the entity column mapping
+    // (couponBookId). In case the DB uses snake_case columns, TypeORM mapping will handle it.
+    await this.repo.delete({ couponBookId } as any);
+  }
+
   async findByUser(userId: string, options?: { status?: string }): Promise<any[]> {
     const where: any = { assignedToUserId: userId };
     if (options?.status) where.status = options.status;

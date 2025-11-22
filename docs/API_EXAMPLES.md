@@ -410,7 +410,38 @@ curl -X GET http://localhost:3000/api/coupons
 
 ---
 
-## 9. Health Check
+## 9. Eliminar un libro de cupones (Delete Coupon Book)
+
+**Endpoint:** `DELETE /api/coupons/:couponBookId`
+
+**Descripción:** Elimina un `Coupon Book` existente y borra en cascada los `coupon_codes` asociados (implementación a nivel de aplicación). En caso de éxito devuelve 204 No Content. Si el libro no existe devuelve 404 Not Found.
+
+**Comando (ejemplo):**
+```bash
+curl -i -X DELETE http://localhost:3000/api/coupons/550e8400-e29b-41d4-a716-446655440000
+```
+
+**Respuesta esperada (éxito):**
+
+HTTP/1.1 204 No Content
+
+Este endpoint no devuelve cuerpo en caso de éxito.
+
+**Respuesta esperada (no existe el libro):**
+
+HTTP/1.1 404 Not Found
+
+```json
+{
+  "statusCode": 404,
+  "message": "Coupon book not found",
+  "error": "Not Found"
+}
+```
+
+---
+
+## 10. Health Check
 
 **Endpoint:** `GET /api/health`
 

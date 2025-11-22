@@ -9,6 +9,7 @@ import { UploadCodesUseCase } from '../../application/use-cases/upload-codes.use
 import { CreateCouponBookUseCase } from '../../application/use-cases/create-coupon-book.use-case';
 import { GetUserCouponsUseCase } from '../../application/use-cases/get-user-coupons.use-case';
 import { GetAllBooksUseCase } from '../../application/use-cases/get-all-books.use-case';
+import { DeleteCouponBookUseCase } from '../../application/use-cases/delete-coupon-book.use-case';
 import { CouponCodeRepository } from '../adapters/persistence/typeorm/repositories/coupon-code.repository';
 import { CouponBookRepository } from '../adapters/persistence/typeorm/repositories/coupon-book.repository';
 import { CouponCodeOrmEntity } from '../adapters/persistence/typeorm/entities/coupon-code.orm-entity';
@@ -36,6 +37,7 @@ import { HealthController } from '@/apps/coupons/http/controllers/health.control
     UploadCodesUseCase,
     CreateCouponBookUseCase,
     GetUserCouponsUseCase,
+  DeleteCouponBookUseCase,
     GetAllBooksUseCase,
     CouponCodeRepository,
     CouponBookRepository,
