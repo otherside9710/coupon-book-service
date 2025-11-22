@@ -1,0 +1,29 @@
+flowchart LR
+  %% ====== Styles ======
+  classDef net fill:#1f77b4,stroke:#0d3d63,color:#fff,stroke-width:1px;
+  classDef compute fill:#2ca02c,stroke:#1b5e20,color:#fff,stroke-width:1px;
+  classDef storage fill:#9467bd,stroke:#4a2d73,color:#fff,stroke-width:1px;
+  classDef cache fill:#ff7f0e,stroke:#a65100,color:#fff,stroke-width:1px;
+  classDef obs fill:#333333,stroke:#000,color:#fff,stroke-width:1px;
+  classDef cicd fill:#005f99,stroke:#003f66,color:#fff,stroke-width:1px;
+
+  %% ====== User + Network ======
+  User["Cliente (User)"]:::net -->|HTTPS| Route53["Route53 / DNS"]:::net
+  Route53 --> ALB["Application Load Balancer (HTTPS)"]:::net
+
+  %% ====== Compute ======
+  ALB --> ECS["ECS Fargate / EKS<br>(coupon-book-service)"]:::compute
+
+  %% ====== Data Layer ======
+  ECS -->|DB Conn| RDS["RDS PostgreSQL (Multi-AZ)"]:::storage
+  ECS -->|Redis Conn| ElastiCache["ElastiCache Redis (Cluster)"]:::cache
+
+  %% ====== Observability ======
+  ECS -.->|Metricas / Logs / Tracing| CloudWatch["CloudWatch / X-Ray / OpenTelemetry"]:::obs
+
+  %% ====== CI/CD ======
+  subgraph CI_CD_PIPELINE["CI/CD Pipeline"]
+      GitHub["GitHub Repo"]:::cicd --> Actions["GitHub Actions / CodeBuild"]:::cicd
+      Actions --> ECR["Elastic Container Registry (ECR)"]:::cicd
+      Actions --> ECS
+  end

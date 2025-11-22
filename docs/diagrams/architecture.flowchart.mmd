@@ -1,0 +1,31 @@
+flowchart LR
+  %% ========= Styles =========
+  classDef net fill:#1f77b4,stroke:#0d3d63,color:#fff,stroke-width:1px;
+  classDef compute fill:#2ca02c,stroke:#1b5e20,color:#fff,stroke-width:1px;
+  classDef storage fill:#9467bd,stroke:#4a2d73,color:#fff,stroke-width:1px;
+  classDef cache fill:#ff7f0e,stroke:#a65100,color:#fff,stroke-width:1px;
+  classDef obs fill:#333333,stroke:#000,color:#fff,stroke-width:1px;
+  classDef cicd fill:#005f99,stroke:#003f66,color:#fff,stroke-width:1px;
+
+  %% ========= Client + Entry =========
+  Client["Cliente<br>(Web / Mobile / Scripts)"]:::net -->|HTTPS| ALB["ALB / API Gateway"]:::net
+
+  %% ========= VPC =========
+  subgraph AWS_VPC["AWS VPC"]
+      ALB --> LB["Internal Load Balancer (NLB / Service LB)"]:::net
+
+      LB --> API["Servicio:<br>coupon-book-service (NestJS)"]:::compute
+
+      API --> Postgres["PostgreSQL (RDS)"]:::storage
+      API --> Redis["Redis (ElastiCache)"]:::cache
+      API --> S3["S3 (Assets / Backups / Storage)"]:::storage
+
+      API -.-> Logs["Logs / Métricas / Tracing<br>(CloudWatch / OpenTelemetry)"]:::obs
+  end
+
+  %% ========= CI/CD =========
+  subgraph CI_CD_PIPELINE["CI/CD Pipeline"]
+      GitHub["GitHub Repo"]:::cicd --> CI_SERVER["CI:<br>GitHub Actions / CodeBuild"]:::cicd
+      CI_SERVER --> ECR["ECR (Container Registry)"]:::cicd
+      ECR --> ALB
+  end

@@ -1,0 +1,44 @@
+erDiagram
+  COUPON_BOOKS {
+    UUID id PK
+    string name
+    text description
+    int max_redemptions_per_user
+    timestamp created_at
+    timestamp updated_at
+  }
+
+  COUPON_CODES {
+    UUID id PK
+    UUID coupon_book_id FK
+    string code
+    string status
+    UUID assigned_to_user_id
+    timestamp assigned_at
+    string locked_by
+    timestamp locked_at
+    timestamp lock_expires_at
+    UUID redeemed_by_user_id
+    timestamp redeemed_at
+    timestamp created_at
+    timestamp updated_at
+  }
+
+  COUPON_REDEMPTIONS {
+    UUID id PK
+    UUID coupon_code_id FK
+    UUID coupon_book_id FK
+    UUID user_id
+    timestamp redeemed_at
+  }
+
+  COUPON_ASSIGNMENTS {
+    UUID id PK
+    UUID coupon_code_id FK
+    UUID user_id
+    timestamp assigned_at
+  }
+
+  COUPON_BOOKS ||--o{ COUPON_CODES : "has"
+  COUPON_CODES ||--o{ COUPON_REDEMPTIONS : "used_in"
+  COUPON_CODES ||--o{ COUPON_ASSIGNMENTS : "assigned_history"

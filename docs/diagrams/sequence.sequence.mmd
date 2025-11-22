@@ -1,0 +1,157 @@
+%%{init: {
+  "theme": "default",
+  "themeVariables": {
+    "textColor": "#ffffff",
+    "fontWeight": "bold",
+
+    /* Actores */
+    "actorTextColor": "#000000",
+    "actorFontWeight": "bold",
+
+    /* Notas */
+    "noteTextColor": "#000000",
+    "noteFontWeight": "bold",
+
+    /* Mensajes */
+    "messageTextColor": "#000000",
+    "messageFontWeight": "bold",
+
+    /* Número de pasos */
+    "sequenceNumberColor": "#000000",
+
+    /* Flechas y líneas */
+    "lineColor": "#000000",
+    "labelColor": "#000000",
+
+    /* Fondo de notes */
+    "noteBkgColor": "#ffffff"
+  }
+}}%%
+
+sequenceDiagram
+  autonumber
+
+  %% PARTICIPANTES
+  participant Admin as Admin / Internal
+  participant Client as Cliente / Usuario
+  participant API as API
+  participant Worker as Worker / Background
+  participant Redis as Redis
+  participant Postgres as PostgreSQL
+
+  %% --- 1) Crear Coupon Book ---
+  rect rgb(215,230,255)
+    Note over Admin,API: 1) Crear Coupon Book
+    Admin->>API: POST /coupons { name, maxCodesPerUser, allowMultipleRedemptionsPerUser }
+    API->>Postgres: INSERT INTO coupon_books (...)
+    API-->>Admin: 201 { couponBookId }
+  end
+
+  %% --- 2) Subir códigos (Bulk Upload) ---
+  rect rgb(225,255,225)
+    Note over Admin,Worker: 2) Subir Códigos (Bulk Upload)
+    Admin->>API: POST /coupons/:couponBookId/codes { codes }
+    API->>Worker: ENQUEUE process-upload
+    API-->>Admin: 202 { jobId }
+    Worker->>Postgres: BULK INSERT coupon_codes
+    Worker-->>API: Job completed
+  end
+
+  %% --- 3) Asignar cupón específico ---
+  rect rgb(225,240,255)
+    Note over Client,API: 3) Asignar Cupón Específico
+    Client->>API: POST /coupons/assign/{code}
+    API->>Postgres: UPDATE coupon_codes SET assigned_to...
+    API-->>Client: 200 { assigned:true }
+  end
+
+  %% --- 4) Asignar cupón aleatorio ---
+  rect rgb(255,245,220)
+    Note over Client,API: 4) Asignar Cupón Aleatorio
+    Client->>API: POST /coupons/assign
+    API->>Postgres: SELECT AVAILABLE code LIMIT 1
+    API->>Postgres: UPDATE coupon_codes SET assigned_to...
+    API-->>Client: 200 { code }
+  end
+
+  %% --- 5) Consultar cupones del usuario ---
+  rect rgb(240,240,240)
+    Note over Client,API: 5) Obtener Cupones del Usuario
+    Client->>API: GET /users/{userId}/coupons
+    API->>Postgres: SELECT * FROM coupon_codes WHERE assigned_to = userId
+    API-->>Client: 200 { coupons:[...] }
+  end
+
+  %% --- 6) Bloquear cupón ---
+  rect rgb(255,225,225)
+    Note over Client,Redis: 6) Lock de Cupón
+    Client->>API: POST /coupons/lock/{code} { userId, ttlSeconds }
+    API->>Redis: SET NX lock:coupon:{code} token EX ttl
+
+    alt Lock Adquirido
+      Redis-->>API: OK
+      API->>Postgres: UPDATE coupon_codes SET locked_by = token, locked_at = now()
+      API-->>Client: 200 { locked:true, token }
+    else Ya estaba bloqueado
+      Redis-->>API: existing token
+      API-->>Client: 423 { secondsRemaining }
+    end
+  end
+
+  %% --- 7) Canjear cupón ---
+  rect rgb(255,235,215)
+    Note over Client,API: 7) Canjear Cupón (Redeem)
+    Client->>API: POST /coupons/redeem/{code}
+
+    API->>Redis: GET lock:coupon:{code}
+
+    alt Lock pertenece a otro usuario
+      Redis-->>API: token
+      API-->>Client: 423 { secondsRemaining }
+
+    else Continuar
+      API->>Postgres: BEGIN
+      API->>Postgres: SELECT * FROM coupon_codes WHERE code = ? FOR UPDATE
+      API->>Postgres: SELECT COUNT(*) FROM coupon_redemptions WHERE user_id = ?
+
+      alt Límite excedido
+        API->>Postgres: ROLLBACK
+        API-->>Client: 409 { reason:"limit" }
+
+      else Permitido
+        API->>Postgres: INSERT INTO coupon_redemptions(...)
+        API->>Postgres: UPDATE coupon_codes SET status = 'REDEEMED'
+        API->>Postgres: COMMIT
+        API-->>Client: 200 { redeemed:true }
+      end
+    end
+  end
+
+  %% --- 8) Limpieza de locks ---
+  rect rgb(230,230,255)
+    Note over Worker,Redis: 8) Cleanup de Locks Expirados
+    Worker->>Redis: GET lock:coupon:{code}
+    alt Lock expiró
+      Redis-->>Worker: nil
+      Worker->>Postgres: CLEAR lock fields
+    else Lock sigue activo
+      Redis-->>Worker: token
+    end
+  end
+
+  %% --- 9) Consultar Coupon Book ---
+  rect rgb(225,255,225)
+    Note over Client,API: 9) Consultar Coupon Book
+    Client->>API: GET /coupons/{couponBookId}
+    API->>Postgres: SELECT coupon_book WHERE id = ?
+    API-->>Client: 200 { couponBook }
+  end
+
+  %% --- 10) Eliminar libro ---
+  rect rgb(255,225,240)
+    Note over Admin,API: 10) Eliminar Coupon Book
+    Admin->>API: DELETE /coupons/{couponBookId}
+    API->>Postgres: DELETE FROM coupon_codes WHERE coupon_book_id = ?
+    API->>Postgres: DELETE FROM coupon_books WHERE id = ?
+    API-->>Admin: 204
+  end
