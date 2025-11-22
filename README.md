@@ -20,7 +20,7 @@ Servicio para gestionar libros de cupones (crear, subir códigos, asignar, bloqu
 - Estado actual (resumen)
 - La mayoría de los endpoints y use-cases están implementados: crear libro, subir códigos, asignar (aleatorio/específico), bloquear y canjear.
 
-## Estructura del proyecto
+## Estructura del proyecto (generada automáticamente)
 
 ```
 coupon-book-service/
@@ -90,7 +90,7 @@ coupon-book-service/
 │               │   ├── database.module.ts                          # Configuración TypeORM
 │               │   └── migrations/
 │               │       ├── data-source.ts                           # DataSource unificado (fuente única de verdad)
-│               │       └── 1700635200000_AddCouponTables.ts         # Migración TypeORM
+│               │       └── 1121202512_AddCouponTables.ts             # Migración TypeORM
 │               └── modules/
 │                   └── coupons.module.ts      # Módulo infra del contexto
 ├── docker-compose.yml                   # Servicios: PostgreSQL 15 + Redis 7
@@ -106,7 +106,7 @@ coupon-book-service/
 └── README.md                            # Este archivo
 ```
 
-### Notas sobre la estructura:
+## Notas sobre la estructura:
 
 - **Arquitectura Hexagonal + DDD:** La estructura separa claramente casos de uso (application), lógica de dominio (domain) y adaptadores de infraestructura (infrastructure).
 - **Puertos y Adaptadores:** Los contratos (ports) están en `domain/contracts/` y sus implementaciones (adapters) en `infrastructure/adapters/`.
@@ -155,7 +155,7 @@ docker-compose up -d
 npm run migration:run
 ```
 
-Esto ejecutará la migración `1700635200000_AddCouponTables.ts` que crea:
+Esto ejecutará la migración `1121202512_AddCouponTables.ts` que crea:
 - Tablas: `coupon_books`, `coupon_codes`, `coupon_assignments`, `coupon_redemptions`
 - Columnas de lock/redemption en `coupon_codes`
 - Opciones de configuración en `coupon_books`
@@ -203,7 +203,7 @@ La aplicación estará disponible en `http://localhost:3000`
 Las migraciones están implementadas como código TypeORM (TypeScript) en `/src/contexts/coupons/infrastructure/database/migrations/`:
 
 - **`data-source.ts`** — DataSource unificado que define la configuración de conexión, entidades y ubicación de migraciones. Es la fuente única de verdad para TypeORM.
-- **`1700635200000_AddCouponTables.ts`** — Migración TypeORM que crea todas las tablas iniciales y columnas necesarias.
+- **`1121202512_AddCouponTables.ts`** — Migración TypeORM que crea todas las tablas iniciales y columnas necesarias.
 
 ### Ejecutar migraciones:
 
