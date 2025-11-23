@@ -231,13 +231,47 @@ Las migraciones son idempotentes y seguras para ejecutar múltiples veces.
 
 ## Pruebas y verificación
 
-- Aún faltan pruebas automáticas (unit/e2e). Recomendado añadir al menos un e2e que cubra flujo: crear libro → subir códigos → asignar → redimir.
+Cómo ejecutar las pruebas
+
+- Ejecutar todos los tests (unit + integration + e2e):
+
+```bash
+npm test
+```
+
+- Ejecutar solo tests unitarios (usa el patrón `unit` en la ruta):
+
+```bash
+npm run test:unit
+```
+
+- Ejecutar solo tests de integración:
+
+```bash
+npm run test:integration
+```
+
+- Ejecutar tests en modo watch:
+
+```bash
+npm run test:watch
+```
+
+- Ejecutar con cobertura y generar informe HTML:
+
+```bash
+npm run test:cov
+```
+
+Recomendación
+
+Mantener la estructura `test/unit`, `test/integration`, `test/e2e` en la raíz hace que la localización de pruebas sea predecible. Si prefieres colocarlas dentro de `src/`, adapta `jest.roots` según convenga.
 
 ## Pendientes / mejoras sugeridas
 
 1. **Locking robusto:** Mejorar a Redis + Redlock para entornos multi-instancia con garantías más fuertes.
 2. **Validación y autenticación:** Añadir ValidationPipe global y guards de autenticación para endpoints.
-3. **Tests unitarios e integración:** Cobertura de unit tests y e2e con docker-compose stack.
+3. **Tests de integración:** e2e con docker-compose stack.
 4. **Documentación OpenAPI:** Integrar Swagger/OpenAPI para documentación automática de endpoints.
 
 ## Contacto y mantenimiento

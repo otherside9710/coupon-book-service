@@ -78,18 +78,33 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
+    "rootDir": ".",
+    "testMatch": [
+      "**/*.spec.ts"
+    ],
+    "roots": [
+      "<rootDir>/",
+      "<rootDir>/src"
+    ],
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "src/**/*.(t|j)s"
     ],
-    "coverageDirectory": "../coverage",
+    "coveragePathIgnorePatterns": [
+      "<rootDir>/src/contexts/coupons/infrastructure/database/migrations/",
+      "<rootDir>/src/contexts/coupons/infrastructure/modules/",
+      "<rootDir>/src/app.module",
+      "<rootDir>/src/main.ts"
+    ],
+    "coverageDirectory": "coverage",
     "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "main\\.spec\\.ts$"
+    ],
     "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/$1"
+      "^@/(.*)$": "<rootDir>/src/$1"
     }
   }
 }
